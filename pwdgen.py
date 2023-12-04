@@ -3,85 +3,86 @@ import json
 import random
 import string
 
-class PasswordManager:
-    def __init__(self, file_path="passwords.json"):
-        self.file_path = file_path
-        self.passwords = self.load_passwords()
+class GestionMotDePasse:
+    def __init__(self, chemin_fichier="passwords.json"):
+        self.chemin_fichier = chemin_fichier
+        self.mots_de_passe = self.charger()
 
-    def load_passwords(self):
+    def charger(self):
         try:
-            with open(self.file_path, "r") as file:
-                return json.load(file)
+            with open(self.chemin_fichier, "r") as fichier:
+                return json.load(fichier)
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
 
-    def save_passwords(self):
-        with open(self.file_path, "w") as file:
-            json.dump(self.passwords, file)
+    def sauvegarder(self):
+        with open(self.chemin_fichier, "w") as fichier:
+            json.dump(self.mots_de_passe, fichier)
 
-    def check_password_requirements(self, password):
+    def verif_exigences(self, mdp):
         return (
-            len(password) >= 8
-            and any(char.isupper() for char in password)
-            and any(char.islower() for char in password)
-            and any(char.isdigit() for char in password)
-            and any(char in "!@#$%^&*" for char in password)
+            len(mdp) >= 8
+            and any(char.isupper() for char in mdp)
+            and any(char.islower() for char in mdp)
+            and any(char.isdigit() for char in mdp)
+            and any(char in "!@#$%^&*" for char in mdp)
         )
 
-    def encrypt_password(self, password):
-        return hashlib.sha256(password.encode()).hexdigest()
+    def encrypter(self, mdp):
+        return hashlib.sha256(mdp.encode()).hexdigest()
 
-    def generate_random_password(self):
-        # Générer un mot de passe aléatoire qui respecte les exigences
-        length = random.randint(8, 12)
-        chars = string.ascii_letters + string.digits + "!@#$%^&*"
-        password = "".join(random.choice(chars) for _ in range(length))
+    def gen_mdp_alea(self):
+        longueur = random.randint(8, 12)
+        caracteres = string.ascii_letters + string.digits + "!@#$%^&*"
+        mdp = "".join(random.choice(caracteres) for _ in range(longueur))
 
-        # Vérifier si le mot de passe généré respecte les exigences
-        while not self.check_password_requirements(password):
-            password = "".join(random.choice(chars) for _ in range(length))
+        while not self.verif_exigences(mdp):
+            mdp = "".join(random.choice(caracteres) for _ in range(longueur))
 
-        return password
+        return mdp
 
-    def add_password(self, username, password=None):
-        if password is None:
-            password = self.generate_random_password()
+    def ajoutmdp(self, utilisateur, mdp=None):
+        if mdp is None:
+            mdp = self.gen_mdp_alea()
 
-        if username in self.passwords:
-            print("Ce nom d'utilisateur a déjà un mot de passe enregistré.")
+        if utilisateur in self.mots_de_passe:
+            print("Cet utilisateur a déjà un mot de passe enregistré.")
             return
 
-        hashed_password = self.encrypt_password(password)
-        self.passwords[username] = hashed_password
-        self.save_passwords()
-        print(f"Mot de passe enregistré avec succès pour {username}.")
+        if self.verif_exigences(mdp):
+            mdp_crypte = self.encrypter(mdp)
+            self.mots_de_passe[utilisateur] = mdp_crypte
+            self.sauvegarder()
+            print(f"Mot de passe enregistré avec succès pour {utilisateur}.")
+        else:
+            print("Le mot de passe généré ne respecte pas les exigences de sécurité. Veuillez réessayer.")
 
-    def display_passwords(self):
-        if self.passwords:
+    def affichermotsdepasse(self):
+        if self.mots_de_passe:
             print("Mots de passe enregistrés :")
-            for username, hashed_password in self.passwords.items():
-                print(f"{username}: {hashed_password}")
+            for utilisateur, mdp_crypte in self.mots_de_passe.items():
+                print(f"{utilisateur}: {mdp_crypte}")
         else:
             print("Aucun mot de passe enregistré.")
 
 def main():
-    manager = PasswordManager()
+    gestionnaire = GestionMotDePasse()
 
     while True:
         print("1. Ajouter un nouveau mot de passe")
         print("2. Afficher les mots de passe enregistrés")
         print("3. Quitter")
 
-        choice = input("Choisissez une option (1, 2 ou 3) : ")
+        choix = input("Choisissez une option (1, 2 ou 3) : ")
 
-        if choice == "1":
-            username = input("Entrez un nom d'utilisateur : ")
-            manager.add_password(username)
+        if choix == "1":
+            utilisateur = input("Nom d'utilisateur : ")
+            gestionnaire.ajoutmdp(utilisateur)
         
-        elif choice == "2":
-            manager.display_passwords()
+        elif choix == "2":
+            gestionnaire.affichermotsdepasse()
 
-        elif choice == "3":
+        elif choix == "3":
             break
 
         else:
