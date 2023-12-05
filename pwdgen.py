@@ -4,7 +4,7 @@ import random
 import string
 
 class GestionMotDePasse:
-    def __init__(self, chemin_fichier="passwords.json"):
+    def __init__(self, chemin_fichier="mots_de_passe.json"):
         # Initialisation de la classe avec le chemin du fichier où les mots de passe sont stockés.
         self.chemin_fichier = chemin_fichier
         self.mots_de_passe = self.charger()  # On charge les mots de passe existants depuis le fichier.
