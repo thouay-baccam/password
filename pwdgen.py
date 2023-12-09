@@ -40,7 +40,7 @@ def chargemdp():
         with open('passwords.json', 'r') as file:
             return json.load(file)
     except FileNotFoundError:
-        return []2
+        return []
 
 # Fonction pour afficher les exigences de sécurité du mot de passe
 def affexigencemdp():
